@@ -10,12 +10,15 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/willhickey/TankWar/images"
 )
 
 const (
 	screenWidth  = 1600
 	screenHeight = 960
+	tankWidth = 32
+	tankHeight = 32
 )
 
 // var (
@@ -38,8 +41,13 @@ func (t *Tank) Update() {
 }
 
 func (t *Tank) UpdatePosition() {
-	t.x += float64(t.speed) * math.Cos(float64(t.angle)*math.Pi/float64(180.0))
-	t.y += float64(t.speed) * math.Sin(float64(t.angle)*math.Pi/float64(180.0))
+	newX := t.x + float64(t.speed) * math.Cos(float64(t.angle)*math.Pi/float64(180.0))
+	newY := t.y + float64(t.speed) * math.Sin(float64(t.angle)*math.Pi/float64(180.0))
+	if newX >= 0 && newX <= screenWidth-tankWidth && newY >=0 && newY <= screenHeight - tankHeight {
+		//todo if the tank speed is -3, and t.x is 2, then it won't proceed to the wall, it stops short
+		t.x = newX
+		t.y = newY
+	}
 }
 
 func (t *Tank) UpdateSpeed() {
@@ -88,7 +96,7 @@ func init() {
 		x:        20,
 		y:        20,
 		acc:      1,
-		maxSpeed: 4,
+		maxSpeed: 8,
 		speed:    0,
 		angle:    0,
 	}
@@ -142,6 +150,10 @@ func update(screen *ebiten.Image) error {
 		return nil
 	}
 	screen.Fill(color.RGBA{0x80, 0x80, 0xc0, 0xff})
+	ebitenutil.DrawRect(screen, 0, 0, 5, screenHeight, color.RGBA{255, 0, 0, 150})
+	ebitenutil.DrawRect(screen, 0, 0, screenWidth, 5, color.RGBA{255, 0, 0, 150})
+	ebitenutil.DrawRect(screen, screenWidth-5, 0, 5, screenHeight, color.RGBA{255, 0, 0, 150})
+	ebitenutil.DrawRect(screen, 0, screenHeight-5, screenWidth, 5, color.RGBA{255, 0, 0, 150})
 	op.GeoM.Reset()
 	w, h := tankImg.Size()
 
@@ -155,6 +167,10 @@ func update(screen *ebiten.Image) error {
 }
 
 func main() {
+	ebiten.SetFullscreen(true)
+	// w, h := ebiten.ScreenSizeInFullscreen()
+	// s := ebiten.DeviceScaleFactor()
+	
 	if err := ebiten.Run(update, screenWidth, screenHeight, 1, "TankWar"); err != nil {
 		log.Fatal(err)
 	}
