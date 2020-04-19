@@ -12,6 +12,8 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/willhickey/TankWar/images"
+	"github.com/willhickey/TankWar/network"
+
 )
 
 const (
@@ -145,7 +147,7 @@ func update(screen *ebiten.Image) error {
 	// 	myTank.y = myTank.y + 2
 	// }
 	myTank.Update()
-	print(fmt.Sprintf("%d,%d\n", myTank.x, myTank.y))
+	//print(fmt.Sprintf("%d,%d\n", myTank.x, myTank.y))
 	if ebiten.IsDrawingSkipped() {
 		return nil
 	}
@@ -170,7 +172,11 @@ func main() {
 	ebiten.SetFullscreen(true)
 	// w, h := ebiten.ScreenSizeInFullscreen()
 	// s := ebiten.DeviceScaleFactor()
-	
+	print(fmt.Sprintf("%d,%d\n", myTank.x, myTank.y))
+	print(fmt.Sprintf("%d\n", network.RxQueue.Len()))
+	network.Foo()
+	print(fmt.Sprintf("%d\n", network.RxQueue.Len()))
+
 	if err := ebiten.Run(update, screenWidth, screenHeight, 1, "TankWar"); err != nil {
 		log.Fatal(err)
 	}
