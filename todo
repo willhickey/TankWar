@@ -1,0 +1,20 @@
+Create a way to ser/deser game state
+Get client and server to use shared state package
+
+
+
+client:
+    thread for listening:
+        always be listening
+    thread for broadcasting:
+        broadcast on a schedule
+    game thread:
+        get inputs
+        update state
+        broadcast state
+        draw screen
+        sleep
+
+better tick times:
+    https://stackoverflow.com/questions/40696458/game-loop-simulation-in-golang
+
