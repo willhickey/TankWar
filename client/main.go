@@ -49,7 +49,7 @@ var (
 		ebiten.KeyLeft,
 		ebiten.KeyRight}
 	done = make(chan bool)
-	clientId = -1
+	clientId int32 = -1
 )
 
 func init() {
@@ -131,6 +131,8 @@ func main() {
 	s, _ := net.ResolveUDPAddr("udp4", "localhost:1984") //CONNECT)
 	c, _ := net.DialUDP("udp4", nil, s)
 	//TODO handshake
+	clientId, _ = doHandshake(c)
+
 	go publish(c)
 
 	if err := ebiten.Run(update, state.ScreenWidth, state.ScreenHeight, 1, "TankWar"); err != nil {

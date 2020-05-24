@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"net"
 	"time"
 
@@ -31,4 +33,22 @@ func publish(conn *net.UDPConn) {
 		}
 		clientFrameNumber++
 	}
+}
+
+func doHandshake(conn *net.UDPConn) (int32, error) {
+	// send passphrase
+	conn.Write([]byte("passphrase"))
+
+	// read a response with a clientid in it
+	buf := make([]byte, 4)
+	n, _, err := conn.ReadFrom(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if n != 4 {
+		log.Fatal("network error: server returned %d bytes during handshake. expected 4.", n)
+	} 
+	clientId := int32(binary.LittleEndian.Uint32(buf))
+	return clientId, nil
+
 }
