@@ -49,6 +49,6 @@ func doHandshake(conn *net.UDPConn) (int32, error) {
 		log.Fatal("network error: server returned %d bytes during handshake. expected 4.", n)
 	} 
 	clientId := int32(binary.LittleEndian.Uint32(buf))
-	return clientId, nil
+	return clientId, nil 
 
 }
