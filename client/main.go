@@ -130,6 +130,7 @@ func main() {
 
 	s, _ := net.ResolveUDPAddr("udp4", "localhost:1984") //CONNECT)
 	c, _ := net.DialUDP("udp4", nil, s)
+	//TODO handshake
 	go publish(c)
 
 	if err := ebiten.Run(update, state.ScreenWidth, state.ScreenHeight, 1, "TankWar"); err != nil {

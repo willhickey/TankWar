@@ -1,8 +1,6 @@
 Create a way to ser/deser game state
 Get client and server to use shared state package
 
-
-
 client:
     thread for listening:
         always be listening
@@ -18,3 +16,14 @@ client:
 better tick times:
     https://stackoverflow.com/questions/40696458/game-loop-simulation-in-golang
 
+
+
+Handshake:
+    When the client first creates a connection (client/main.go #132):
+        call doHandShake()
+    Create a new file client/handshake.go that contains a single function (see transmitter.go for example)
+        func doHandshake (conn *net.UDPConn) { ... }
+            Send some specific phrase to the server (this is just cheap security)
+            Read a response from the server.
+            Parse the response and save the ID in clientId
+    

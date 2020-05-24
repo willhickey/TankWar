@@ -103,6 +103,9 @@ func  handleUpdates() {
 	print("handleUpdates")
 	for {
 		t := <- listenQueue
+		//check if t contains the secret phrase
+		//	if yes, do handshaek
+		//	if no, is there a client id that matches our know list
 		print(fmt.Sprintf("handle update: %v\n", t))
 	}
 }
