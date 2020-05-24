@@ -10,8 +10,9 @@ import (
 
 	"github.com/willhickey/TankWar/state"
 )
+
 /*
-TODO 
+TODO
 Client sends to server:
 	id (from handshake)
 	Tank
@@ -20,10 +21,10 @@ Client sends to server:
 
 func publish(conn *net.UDPConn) {
 	clientFrameNumber := 0
-	ticker := time.NewTicker(16667 * time.Microsecond)	//~60 fps
+	ticker := time.NewTicker(16667 * time.Microsecond) //~60 fps
 	for {
 		select {
-		case <- done:
+		case <-done:
 			return
 		case <-ticker.C:
 			state.TankToBytes(myTank, myTankBytes)
@@ -36,6 +37,7 @@ func publish(conn *net.UDPConn) {
 }
 
 func doHandshake(conn *net.UDPConn) (int32, error) {
+	// print("doing handshake\n")
 	// send passphrase
 	conn.Write([]byte("passphrase"))
 
@@ -47,8 +49,8 @@ func doHandshake(conn *net.UDPConn) (int32, error) {
 	}
 	if n != 4 {
 		log.Fatal("network error: server returned %d bytes during handshake. expected 4.", n)
-	} 
+	}
 	clientId := int32(binary.LittleEndian.Uint32(buf))
-	return clientId, nil 
+	return clientId, nil
 
 }

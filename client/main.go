@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"encoding/hex"
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -39,21 +39,21 @@ import (
 // }
 
 var (
-	tankImg *ebiten.Image
-	op      = &ebiten.DrawImageOptions{}
-	myTank  *state.Tank
-	keyState = make(map[ebiten.Key]bool)
+	tankImg     *ebiten.Image
+	op          = &ebiten.DrawImageOptions{}
+	myTank      *state.Tank
+	keyState    = make(map[ebiten.Key]bool)
 	myTankBytes = make([]byte, state.TankByteLength)
-	keys = [...]ebiten.Key{ebiten.KeyUp,
+	keys        = [...]ebiten.Key{ebiten.KeyUp,
 		ebiten.KeyDown,
 		ebiten.KeyLeft,
 		ebiten.KeyRight}
-	done = make(chan bool)
+	done           = make(chan bool)
 	clientId int32 = -1
 )
 
 func init() {
-	myTank = state.NewTank(20, 20, 1, 8, 0, 0)
+	myTank = state.NewTank(20, 20, 1, 4, 0, 0)
 	// &state.Tank{
 	// 	x:        20,
 	// 	y:        20,
@@ -115,22 +115,18 @@ func update(screen *ebiten.Image) error {
 
 func main() {
 
-	
-
 	ebiten.SetFullscreen(true)
 	// w, h := ebiten.ScreenSizeInFullscreen()
 	// s := ebiten.DeviceScaleFactor()
-	
+
 	/*
-	connect to server
-	spawn listener thread
-	spawn publisher thread
+		connect to server
+		spawn listener thread
+		spawn publisher thread
 	*/
 
-
-	s, _ := net.ResolveUDPAddr("udp4", "localhost:1984") //CONNECT)
+	s, _ := net.ResolveUDPAddr("udp4", "localhost:1984")
 	c, _ := net.DialUDP("udp4", nil, s)
-	//TODO handshake
 	clientId, _ = doHandshake(c)
 
 	go publish(c)

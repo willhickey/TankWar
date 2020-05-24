@@ -18,7 +18,7 @@ server:
             max frame processed
             last heard from
             tank data
-        
+
 */
 
 //nc -u localhost 1053
@@ -29,11 +29,13 @@ package main
 import (
 
 	// "encoding/binary"
+	"bytes"
+	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"net"
 	"time"
-	"fmt"
 
 	"github.com/willhickey/TankWar/state"
 )
@@ -43,9 +45,12 @@ const (
 )
 
 var (
-	clients = make(map[uint8]state.ClientState)
-	listenQueue = make(chan *state.Tank, 10)
+	clients              = make(map[uint8]state.ClientState)
+	listenQueue          = make(chan *state.Tank, 10)
+	handshakeQueue       = make(chan *net.Addr, 10)
+	nextClientId   int32 = 0
 )
+
 func main() {
 	// listen to incoming udp packets
 	conn, err := net.ListenPacket("udp", ":1984")
@@ -54,12 +59,9 @@ func main() {
 	}
 	defer conn.Close()
 
-	
-	
-	
-	
 	go dropDisconnectedClients()
 	go handleUpdates()
+	go handleHandshakes(conn)
 	listen(conn)
 	// for {
 	// 	// print("1")
@@ -82,27 +84,48 @@ func main() {
 
 //TODO need to implement a handshake and block clients that don't abide
 func listen(conn net.PacketConn) {
+	passphrase := []byte("passphrase")
 	for {
 		t := &state.Tank{}
 		buf := make([]byte, 1024)
-		n, _, err := conn.ReadFrom(buf)
+		n, addr, err := conn.ReadFrom(buf)
+		// print("\n")
 		if err != nil {
 			continue
 		}
 		print(fmt.Sprintf("%s", hex.Dump(buf[:n])))
-		state.TankFromBytes(buf[:n], t)
-		fmt.Printf("Enqueue %+v\n", t)
-		listenQueue <- t
+		if bytes.Compare(buf[:n], passphrase) == 0 {
+			print("got passphrase. sending to handshake queue\n")
+			handshakeQueue <- &addr
+		} else {
+			state.TankFromBytes(buf[:n], t)
+			// fmt.Printf("Enqueue %+v\n", t)
+			listenQueue <- t
+		}
 		// state.ClientStateFromBytes(buf[:n], cs)
 		// listenQueue.PushBack(cs)
 	}
 }
 
-// func handleUpdates(c chan *state.Tank) {
-func  handleUpdates() {
-	print("handleUpdates")
+func handleHandshakes(conn net.PacketConn) {
+	print("handleHandshakes")
+	buf := make([]byte, 4)
 	for {
-		t := <- listenQueue
+		addr := <-handshakeQueue
+		print("processing handshake...\n")
+		binary.LittleEndian.PutUint32(buf, uint32(nextClientId))
+		print(fmt.Sprintf("sending: %d\n", nextClientId))
+		conn.WriteTo(buf, *addr)
+
+		nextClientId++
+	}
+}
+
+// func handleUpdates(c chan *state.Tank) {
+func handleUpdates() {
+	// print("handleUpdates")
+	for {
+		t := <-listenQueue
 		//check if t contains the secret phrase
 		//	if yes, do handshaek
 		//	if no, is there a client id that matches our know list
@@ -112,10 +135,10 @@ func  handleUpdates() {
 
 func dropDisconnectedClients() {
 	done := make(chan bool, 1)
-	ticker := time.NewTicker(16667 * time.Microsecond)	//~60 fps
+	ticker := time.NewTicker(16667 * time.Microsecond) //~60 fps
 	for {
 		select {
-		case <- done:
+		case <-done:
 			return
 		case <-ticker.C:
 			// now := time.Now()
@@ -154,7 +177,7 @@ func dropDisconnectedClients() {
 //connect to this with
 //nc -u localhost 1984
 // func publish(pc net.PacketConn, addr net.Addr){
-	
+
 // 	print("Inside publish\n")
 // 	bytes := make([]byte, 8)
 // 	print(fmt.Sprintf("publish Bytes: %s\n", bytes))
